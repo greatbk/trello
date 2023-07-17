@@ -18,7 +18,7 @@ const BoardList: FC<BoardListProps> = ({
   list,
   onRemoveList,
   index,
-  onMoveList: MoveFunc,
+  onMoveList,
   ...props
 }) => {
   const {cards, onPrependCard, onAppendCard, onRemoveCard} = useCards(list.uuid)

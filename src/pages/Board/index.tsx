@@ -1,18 +1,31 @@
-import {useMemo} from 'react'
+import {useMemo, useRef} from 'react'
 import {Title} from '../../components'
 import CreateListForm from './CreateListForm'
 import BoardList from '../BoardList'
 import {useLists} from '../../store/useLists'
+import {useDrop} from 'react-dnd'
 
 export default function Board() {
-  const {lists, onRemoveList, onCreateList} = useLists()
+  const divRef = useRef<HTMLDivElement>(null)
+  const [, drop] = useDrop({
+    accept: 'list'
+  })
+  drop(divRef)
+
+  const {lists, onRemoveList, onCreateList, onMoveList} = useLists()
 
   const children = useMemo(
     () =>
-      lists.map(list => (
-        <BoardList key={list.uuid} list={list} onRemoveList={onRemoveList(list.uuid)} />
+      lists.map((list, index) => (
+        <BoardList
+          key={list.uuid}
+          list={list}
+          onRemoveList={onRemoveList(list.uuid)}
+          index={index}
+          onMoveList={onMoveList}
+        />
       )),
-    [lists, onRemoveList]
+    [lists, onRemoveList, onMoveList]
   )
 
   return (
