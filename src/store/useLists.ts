@@ -6,6 +6,8 @@ import * as LO from './listidOrders'
 import * as L from './listEntities'
 import * as C from './cardEntities'
 import * as LC from './listidCardidOrders'
+import * as U from '../utils'
+import {DropResult} from 'react-beautiful-dnd'
 
 export const useLists = () => {
   const dispatch = useDispatch()
@@ -56,5 +58,53 @@ export const useLists = () => {
     [dispatch, listidOrders]
   )
 
-  return {lists, onCreateList, onRemoveList, onMoveList}
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      console.log('onDragEnd result', result)
+      const destinationListid = result.destination?.droppableId
+      const destinationCardIndex = result.destination?.index
+      if (destinationListid === undefined || destinationCardIndex === undefined) {
+        return
+      }
+
+      const sourceListid = result.source.droppableId
+      const sourceCardIndex = result.source.index
+
+      if (destinationListid === sourceListid) {
+        const cardidOrders = listidCardidOrders[destinationListid]
+        dispatch(
+          LC.setListidCardids({
+            listid: destinationListid,
+            cardids: U.swapItemsInArray(
+              cardidOrders,
+              sourceCardIndex,
+              destinationCardIndex
+            )
+          })
+        )
+      } else {
+        const sourceCardidOrders = listidCardidOrders[sourceListid]
+        dispatch(
+          LC.setListidCardids({
+            listid: sourceListid,
+            cardids: U.removeItemAtIndexInArray(sourceCardidOrders, sourceCardIndex)
+          })
+        )
+        const destinationCardidOrders = listidCardidOrders[destinationListid]
+        dispatch(
+          LC.setListidCardids({
+            listid: destinationListid,
+            cardids: U.insertItemAtIndexInArray(
+              destinationCardidOrders,
+              destinationCardIndex,
+              result.draggableId
+            )
+          })
+        )
+      }
+    },
+    [listidCardidOrders, dispatch]
+  )
+
+  return {lists, onCreateList, onRemoveList, onMoveList, onDragEnd}
 }
