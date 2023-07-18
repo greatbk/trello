@@ -44,6 +44,7 @@ export const ListDraggable: FC<ListDraggableProps> = ({
         return
       }
       onMove(dragIndex, hoverIndex)
+      item.index = hoverIndex
     }
   })
 
